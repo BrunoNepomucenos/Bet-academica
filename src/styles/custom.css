@@ -1,28 +1,295 @@
-/* Estilos complementares ao Bootstrap */
+/* =========================================================================
+   Bet Acadêmica — Design System
+   Tema moderno com suporte a modo claro/escuro (data-bs-theme do Bootstrap 5.3)
+   ========================================================================= */
+
+:root {
+  --bet-primary: #16c784;        /* verde apostas */
+  --bet-primary-dark: #0fa968;
+  --bet-accent: #6c5ce7;         /* roxo de destaque */
+  --bet-gradient: linear-gradient(135deg, #16c784 0%, #0d9488 50%, #6c5ce7 100%);
+  --bet-gradient-soft: linear-gradient(135deg, rgba(22,199,132,0.12), rgba(108,92,231,0.12));
+  --bet-radius: 16px;
+  --bet-shadow: 0 10px 30px -12px rgba(15, 23, 42, 0.25);
+  --bet-shadow-hover: 0 18px 40px -14px rgba(15, 23, 42, 0.35);
+  --bet-surface: #ffffff;
+  --bet-body-bg: #eef2f7;
+  --bet-border: rgba(15, 23, 42, 0.08);
+}
+
+/* ---- Modo escuro ---- */
+[data-bs-theme='dark'] {
+  --bet-surface: #1b2333;
+  --bet-body-bg: #0f1623;
+  --bet-border: rgba(255, 255, 255, 0.08);
+  --bet-shadow: 0 10px 30px -12px rgba(0, 0, 0, 0.6);
+  --bet-shadow-hover: 0 18px 40px -14px rgba(0, 0, 0, 0.7);
+  --bs-body-bg: var(--bet-body-bg);
+  --bs-body-color: #e7ecf3;
+}
+
+* {
+  scrollbar-color: var(--bet-primary) transparent;
+}
 
 body {
-  background-color: #f4f6f9;
+  font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  background-color: var(--bet-body-bg);
+  background-image:
+    radial-gradient(900px circle at 100% -10%, rgba(108, 92, 231, 0.10), transparent 45%),
+    radial-gradient(900px circle at 0% 0%, rgba(22, 199, 132, 0.10), transparent 40%);
+  background-attachment: fixed;
+  min-height: 100vh;
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
 
-.navbar-brand {
+/* ============================ Layout ============================ */
+.app-main {
+  min-height: calc(100vh - 140px);
+}
+
+.page-header {
+  margin-bottom: 1.5rem;
+}
+.page-header h2 {
   font-weight: 700;
+  letter-spacing: -0.02em;
+}
+.page-title-accent {
+  background: var(--bet-gradient);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
 }
 
-/* Destaque suave ao passar o mouse nos cards de evento */
+/* ============================ Navbar ============================ */
+.bet-navbar {
+  background: rgba(13, 18, 28, 0.85) !important;
+  backdrop-filter: blur(14px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+.bet-navbar .navbar-brand {
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+.bet-navbar .nav-link {
+  border-radius: 10px;
+  padding: 0.4rem 0.85rem !important;
+  margin: 0 2px;
+  transition: background-color 0.15s ease, color 0.15s ease;
+}
+.bet-navbar .nav-link:hover {
+  background: rgba(255, 255, 255, 0.08);
+}
+.bet-navbar .nav-link.active {
+  background: var(--bet-primary);
+  color: #06281c !important;
+  font-weight: 700;
+  text-decoration: none;
+}
+.saldo-badge {
+  background: var(--bet-gradient) !important;
+  color: #06281c !important;
+  font-weight: 700;
+  border-radius: 999px;
+  padding: 0.45rem 0.9rem;
+}
+.avatar-circ {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: var(--bet-gradient);
+  color: #06281c;
+  font-weight: 800;
+  font-size: 0.85rem;
+}
+
+/* ============================ Cards ============================ */
 .card {
-  transition: transform 0.15s ease, box-shadow 0.15s ease;
+  border: 1px solid var(--bet-border);
+  border-radius: var(--bet-radius);
+  background-color: var(--bet-surface);
+  box-shadow: var(--bet-shadow);
+  transition: transform 0.18s ease, box-shadow 0.18s ease;
 }
-
-.card:hover {
-  transform: translateY(-2px);
+.card.is-hoverable:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--bet-shadow-hover);
 }
-
-/* Link ativo do menu */
-.nav-link.active {
+.card-header {
+  background: transparent;
+  border-bottom: 1px solid var(--bet-border);
   font-weight: 600;
-  text-decoration: underline;
 }
 
-main {
-  min-height: calc(100vh - 56px);
+/* Stat cards */
+.stat-card {
+  position: relative;
+  overflow: hidden;
+  border: none;
+  color: #fff;
+  border-radius: var(--bet-radius);
+}
+.stat-card .stat-icon {
+  position: absolute;
+  right: -8px;
+  bottom: -12px;
+  font-size: 4.2rem;
+  opacity: 0.18;
+  line-height: 1;
+}
+.stat-card .stat-label {
+  font-size: 0.8rem;
+  opacity: 0.9;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+.stat-card .stat-value {
+  font-size: 1.7rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+.bg-grad-green  { background: linear-gradient(135deg, #16c784, #0d9488); }
+.bg-grad-purple { background: linear-gradient(135deg, #6c5ce7, #4834d4); }
+.bg-grad-blue   { background: linear-gradient(135deg, #1e90ff, #2563eb); }
+.bg-grad-dark   { background: linear-gradient(135deg, #2d3748, #1a202c); }
+.bg-grad-amber  { background: linear-gradient(135deg, #f59e0b, #d97706); }
+.bg-grad-red    { background: linear-gradient(135deg, #ef4444, #dc2626); }
+
+/* Evento card */
+.evento-card .evento-vs {
+  font-weight: 800;
+  font-size: 1.15rem;
+  letter-spacing: -0.01em;
+}
+.evento-card .odd-box {
+  background: var(--bet-gradient-soft);
+  border: 1px solid var(--bet-border);
+  border-radius: 12px;
+  padding: 0.5rem;
+  text-align: center;
+}
+.evento-card .odd-box .odd-value {
+  font-weight: 800;
+  font-size: 1.1rem;
+  color: var(--bet-primary);
+}
+.evento-card .odd-box .odd-team {
+  font-size: 0.72rem;
+  opacity: 0.7;
+  display: block;
+}
+
+/* ============================ Botões ============================ */
+.btn {
+  border-radius: 10px;
+  font-weight: 600;
+}
+.btn-success {
+  background: var(--bet-gradient);
+  border: none;
+}
+.btn-success:hover,
+.btn-success:focus {
+  filter: brightness(1.05);
+  background: var(--bet-gradient);
+}
+.btn-gradient {
+  background: var(--bet-gradient);
+  border: none;
+  color: #06281c;
+}
+.btn-gradient:hover {
+  filter: brightness(1.05);
+  color: #06281c;
+}
+
+/* ============================ Badges ============================ */
+.badge {
+  font-weight: 600;
+  border-radius: 999px;
+  padding: 0.4em 0.7em;
+}
+
+/* ============================ Login ============================ */
+.auth-wrapper {
+  min-height: calc(100vh - 140px);
+  display: flex;
+  align-items: center;
+}
+.auth-hero {
+  background: var(--bet-gradient);
+  color: #06281c;
+  border-radius: var(--bet-radius);
+  padding: 2.5rem;
+  height: 100%;
+}
+.auth-hero h1 {
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+.auth-hero .feature-line {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  margin-bottom: 0.6rem;
+  font-weight: 500;
+}
+
+/* ============================ Tabelas ============================ */
+.table {
+  --bs-table-bg: transparent;
+}
+.table > :not(caption) > * > * {
+  padding: 0.85rem 1rem;
+}
+
+/* ============================ Footer ============================ */
+.bet-footer {
+  border-top: 1px solid var(--bet-border);
+  background: var(--bet-surface);
+  color: var(--bs-secondary-color);
+  padding: 1.25rem 0;
+  font-size: 0.875rem;
+}
+
+/* ============================ Animações ============================ */
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.fade-in-up {
+  animation: fadeInUp 0.35s ease both;
+}
+
+/* Empty state */
+.empty-state {
+  text-align: center;
+  padding: 3rem 1rem;
+  color: var(--bs-secondary-color);
+}
+.empty-state .empty-emoji {
+  font-size: 3rem;
+  display: block;
+  margin-bottom: 0.5rem;
+}
+
+/* Chip de filtro */
+.chip {
+  border: 1px solid var(--bet-border);
+  background: var(--bet-surface);
+  border-radius: 999px;
+  padding: 0.35rem 0.9rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+.chip:hover { border-color: var(--bet-primary); }
+.chip.active {
+  background: var(--bet-gradient);
+  color: #06281c;
+  border-color: transparent;
 }
