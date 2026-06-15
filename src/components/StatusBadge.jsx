@@ -8,15 +8,17 @@ const cores = {
   pendente: 'info',
   ganha: 'success',
   perdida: 'danger',
+  cancelada: 'secondary',
 }
 
 const rotulos = {
-  aberto: 'Aberto',
-  encerrado: 'Apostas encerradas',
-  finalizado: 'Finalizado',
-  pendente: 'Pendente',
-  ganha: 'Ganha',
-  perdida: 'Perdida',
+  aberto: '🟢 Aberto',
+  encerrado: '🔒 Apostas encerradas',
+  finalizado: '🏁 Finalizado',
+  pendente: '⏳ Pendente',
+  ganha: '✅ Ganha',
+  perdida: '❌ Perdida',
+  cancelada: '↩️ Cancelada',
 }
 
 // Componente reutilizavel usado nas telas de eventos e apostas.
