@@ -15,6 +15,8 @@ import { buscarUsuario, atualizarUsuario } from '../../services/usuarios.js'
 import { useToast } from '../../contexts/ToastContext.jsx'
 import StatusBadge from '../../components/StatusBadge.jsx'
 import Loader from '../../components/Loader.jsx'
+import ConfirmModal from '../../components/ConfirmModal.jsx'
+import EmptyState from '../../components/EmptyState.jsx'
 
 const eventoVazio = {
   timeA: '',
@@ -25,15 +27,16 @@ const eventoVazio = {
   oddB: 2.0,
 }
 
-// Tela do administrador: cadastra eventos, encerra apostas e lanca o resultado.
+// Tela do administrador: cadastra/edita eventos, encerra apostas e lanca o resultado.
 export default function EventosAdmin() {
   const { notificar } = useToast()
   const [eventos, setEventos] = useState([])
   const [carregando, setCarregando] = useState(true)
   const [form, setForm] = useState(eventoVazio)
+  const [editandoId, setEditandoId] = useState(null)
 
-  // Modal de resultado
   const [eventoResultado, setEventoResultado] = useState(null)
+  const [eventoExcluir, setEventoExcluir] = useState(null)
 
   useEffect(() => {
     carregar()
@@ -50,36 +53,58 @@ export default function EventosAdmin() {
     setForm((f) => ({ ...f, [name]: value }))
   }
 
-  // Cadastro de novo evento (status inicial "aberto").
-  async function cadastrar(e) {
+  function iniciarEdicao(evento) {
+    setEditandoId(evento.id)
+    setForm({
+      timeA: evento.timeA,
+      timeB: evento.timeB,
+      esporte: evento.esporte,
+      data: evento.data,
+      oddA: evento.oddA,
+      oddB: evento.oddB,
+    })
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  }
+
+  function cancelarEdicao() {
+    setEditandoId(null)
+    setForm(eventoVazio)
+  }
+
+  // Cadastro de novo evento ou atualizacao de um existente.
+  async function salvar(e) {
     e.preventDefault()
     try {
-      await criarEvento({
-        ...form,
-        oddA: Number(form.oddA),
-        oddB: Number(form.oddB),
-        status: 'aberto',
-        resultado: '',
-      })
-      setForm(eventoVazio)
-      notificar('Evento cadastrado com sucesso!', 'success')
+      const dados = { ...form, oddA: Number(form.oddA), oddB: Number(form.oddB) }
+      if (editandoId) {
+        await atualizarEvento(editandoId, dados)
+        notificar('Evento atualizado com sucesso!', 'success')
+      } else {
+        await criarEvento({ ...dados, status: 'aberto', resultado: '' })
+        notificar('Evento cadastrado com sucesso!', 'success')
+      }
+      cancelarEdicao()
       carregar()
     } catch {
-      notificar('Erro ao cadastrar evento.', 'danger')
+      notificar('Erro ao salvar evento.', 'danger')
     }
   }
 
-  // Encerra as apostas: ninguem mais pode apostar neste evento.
   async function encerrarApostas(evento) {
     await atualizarEvento(evento.id, { status: 'encerrado' })
     notificar('Apostas encerradas para este evento.', 'warning')
     carregar()
   }
 
-  async function excluir(evento) {
-    await removerEvento(evento.id)
-    notificar('Evento removido.', 'info')
-    carregar()
+  async function confirmarExclusao() {
+    try {
+      await removerEvento(eventoExcluir.id)
+      notificar('Evento removido.', 'info')
+      setEventoExcluir(null)
+      carregar()
+    } catch {
+      notificar('Erro ao remover evento.', 'danger')
+    }
   }
 
   // Processa o resultado: define vencedor, atualiza apostas e credita os ganhadores.
@@ -99,7 +124,6 @@ export default function EventosAdmin() {
           retorno,
         })
 
-        // Credita o premio no saldo do ganhador e registra a movimentacao.
         if (acertou) {
           const jogador = await buscarUsuario(aposta.usuarioId)
           await atualizarUsuario(jogador.id, { saldo: jogador.saldo + retorno })
@@ -124,15 +148,20 @@ export default function EventosAdmin() {
 
   return (
     <>
-      <h2 className="mb-3">Gerenciamento de Eventos</h2>
+      <div className="page-header">
+        <h2>Gerenciamento de <span className="page-title-accent">Eventos</span></h2>
+        <p className="text-muted mb-0">Cadastre, edite, encerre apostas e lance resultados.</p>
+      </div>
 
       <Row className="g-4">
-        {/* Formulario de cadastro */}
+        {/* Formulario de cadastro/edicao */}
         <Col lg={4}>
           <Card className="shadow-sm">
-            <Card.Header className="fw-semibold">Cadastrar evento</Card.Header>
+            <Card.Header className="fw-semibold">
+              {editandoId ? '✏️ Editar evento' : '➕ Cadastrar evento'}
+            </Card.Header>
             <Card.Body>
-              <Form onSubmit={cadastrar}>
+              <Form onSubmit={salvar}>
                 <Form.Group className="mb-2">
                   <Form.Label>Time / Atleta A</Form.Label>
                   <Form.Control name="timeA" value={form.timeA} onChange={handleChange} required />
@@ -169,9 +198,16 @@ export default function EventosAdmin() {
                     </Form.Group>
                   </Col>
                 </Row>
-                <Button type="submit" variant="success" className="w-100">
-                  Cadastrar
-                </Button>
+                <div className="d-grid gap-2">
+                  <Button type="submit" variant="success">
+                    {editandoId ? 'Salvar alterações' : 'Cadastrar'}
+                  </Button>
+                  {editandoId && (
+                    <Button variant="outline-secondary" onClick={cancelarEdicao}>
+                      Cancelar edição
+                    </Button>
+                  )}
+                </div>
               </Form>
             </Card.Body>
           </Card>
@@ -180,10 +216,12 @@ export default function EventosAdmin() {
         {/* Lista de eventos */}
         <Col lg={8}>
           <Card className="shadow-sm">
-            <Card.Header className="fw-semibold">Eventos cadastrados</Card.Header>
+            <Card.Header className="fw-semibold">Eventos cadastrados ({eventos.length})</Card.Header>
             <Card.Body className="p-0">
               {carregando ? (
                 <Loader />
+              ) : eventos.length === 0 ? (
+                <EmptyState emoji="🏟️" titulo="Nenhum evento cadastrado" descricao="Use o formulário ao lado para criar o primeiro." />
               ) : (
                 <Table responsive hover className="mb-0 align-middle">
                   <thead className="table-dark">
@@ -198,7 +236,7 @@ export default function EventosAdmin() {
                     {eventos.map((evento) => (
                       <tr key={evento.id}>
                         <td>
-                          {evento.timeA} x {evento.timeB}
+                          {evento.timeA} × {evento.timeB}
                           <div className="small text-muted">
                             {new Date(evento.data).toLocaleDateString('pt-BR')}
                             {evento.resultado && ` · Vencedor: ${evento.resultado}`}
@@ -207,6 +245,12 @@ export default function EventosAdmin() {
                         <td>{evento.esporte}</td>
                         <td><StatusBadge status={evento.status} /></td>
                         <td className="text-end">
+                          {evento.status !== 'finalizado' && (
+                            <Button size="sm" variant="outline-secondary" className="me-1 mb-1"
+                              onClick={() => iniciarEdicao(evento)}>
+                              Editar
+                            </Button>
+                          )}
                           {evento.status === 'aberto' && (
                             <Button size="sm" variant="warning" className="me-1 mb-1"
                               onClick={() => encerrarApostas(evento)}>
@@ -220,7 +264,7 @@ export default function EventosAdmin() {
                             </Button>
                           )}
                           <Button size="sm" variant="outline-danger" className="mb-1"
-                            onClick={() => excluir(evento)}>
+                            onClick={() => setEventoExcluir(evento)}>
                             Excluir
                           </Button>
                         </td>
@@ -241,7 +285,7 @@ export default function EventosAdmin() {
         </Modal.Header>
         {eventoResultado && (
           <Modal.Body>
-            <p>Quem venceu <strong>{eventoResultado.timeA} x {eventoResultado.timeB}</strong>?</p>
+            <p>Quem venceu <strong>{eventoResultado.timeA} × {eventoResultado.timeB}</strong>?</p>
             <p className="text-muted small">
               Ao confirmar, as apostas pendentes serão atualizadas e os ganhadores receberão o prêmio.
             </p>
@@ -256,6 +300,20 @@ export default function EventosAdmin() {
           </Modal.Body>
         )}
       </Modal>
+
+      {/* Confirmacao de exclusao */}
+      <ConfirmModal
+        show={!!eventoExcluir}
+        titulo="Excluir evento"
+        mensagem={
+          eventoExcluir
+            ? `Tem certeza que deseja excluir "${eventoExcluir.timeA} × ${eventoExcluir.timeB}"? Esta ação não pode ser desfeita.`
+            : ''
+        }
+        textoConfirmar="Excluir"
+        onConfirmar={confirmarExclusao}
+        onHide={() => setEventoExcluir(null)}
+      />
     </>
   )
 }

@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react'
-import { Card, Table, Alert } from 'react-bootstrap'
+import { Card, Table } from 'react-bootstrap'
 import { listarJogadores } from '../../services/usuarios.js'
 import { useAuth } from '../../contexts/AuthContext.jsx'
 import Loader from '../../components/Loader.jsx'
+import EmptyState from '../../components/EmptyState.jsx'
 
 // EXTRA: ranking de jogadores ordenado pelo saldo ficticio.
 export default function Ranking() {
@@ -26,11 +27,13 @@ export default function Ranking() {
 
   return (
     <>
-      <h2 className="mb-1">Ranking de Jogadores</h2>
-      <p className="text-muted">Classificação pelo saldo fictício acumulado.</p>
+      <div className="page-header">
+        <h2>Ranking de <span className="page-title-accent">Jogadores</span></h2>
+        <p className="text-muted mb-0">Classificação pelo saldo fictício acumulado.</p>
+      </div>
 
       {jogadores.length === 0 ? (
-        <Alert variant="info">Nenhum jogador cadastrado.</Alert>
+        <EmptyState emoji="🏆" titulo="Sem jogadores" descricao="Nenhum jogador cadastrado ainda." />
       ) : (
         <Card className="shadow-sm">
           <Table responsive hover className="mb-0 align-middle text-center">
@@ -38,6 +41,7 @@ export default function Ranking() {
               <tr>
                 <th>Posição</th>
                 <th className="text-start">Jogador</th>
+                <th>Bônus</th>
                 <th>Saldo</th>
               </tr>
             </thead>
@@ -54,6 +58,7 @@ export default function Ranking() {
                       <span className="badge bg-success ms-2">você</span>
                     )}
                   </td>
+                  <td className="text-info small">R$ {Number(jogador.bonus || 0).toFixed(2)}</td>
                   <td className="fw-bold">R$ {Number(jogador.saldo).toFixed(2)}</td>
                 </tr>
               ))}

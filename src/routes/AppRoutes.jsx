@@ -1,8 +1,11 @@
 import { Routes, Route, Navigate } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext.jsx'
 import RoleRoute from './RoleRoute.jsx'
+import PrivateRoute from './PrivateRoute.jsx'
 
 import Login from '../pages/Login.jsx'
+import Cadastro from '../pages/Cadastro.jsx'
+import Regulamento from '../pages/Regulamento.jsx'
 import AdminDashboard from '../pages/admin/AdminDashboard.jsx'
 import EventosAdmin from '../pages/admin/EventosAdmin.jsx'
 import BonusAdmin from '../pages/admin/BonusAdmin.jsx'
@@ -10,6 +13,7 @@ import UserDashboard from '../pages/user/UserDashboard.jsx'
 import EventosDisponiveis from '../pages/user/EventosDisponiveis.jsx'
 import HistoricoApostas from '../pages/user/HistoricoApostas.jsx'
 import Ranking from '../pages/user/Ranking.jsx'
+import Perfil from '../pages/user/Perfil.jsx'
 
 // Redireciona a rota raiz conforme o perfil (ou login se nao autenticado).
 function Inicio() {
@@ -23,6 +27,17 @@ export default function AppRoutes() {
     <Routes>
       <Route path="/" element={<Inicio />} />
       <Route path="/login" element={<Login />} />
+      <Route path="/cadastro" element={<Cadastro />} />
+
+      {/* Pagina de regulamento: qualquer usuario autenticado (EXTRA) */}
+      <Route
+        path="/regulamento"
+        element={
+          <PrivateRoute>
+            <Regulamento />
+          </PrivateRoute>
+        }
+      />
 
       {/* Area do Administrador */}
       <Route
@@ -80,6 +95,14 @@ export default function AppRoutes() {
         element={
           <RoleRoute perfil="usuario">
             <Ranking />
+          </RoleRoute>
+        }
+      />
+      <Route
+        path="/perfil"
+        element={
+          <RoleRoute perfil="usuario">
+            <Perfil />
           </RoleRoute>
         }
       />
