@@ -1,0 +1,88 @@
+{
+  "usuarios": [
+    {
+      "id": 1,
+      "nome": "Administrador",
+      "email": "admin@bet.com",
+      "senha": "123",
+      "perfil": "admin",
+      "saldo": 0,
+      "bonus": 0
+    },
+    {
+      "id": 2,
+      "nome": "João Jogador",
+      "email": "joao@bet.com",
+      "senha": "123",
+      "perfil": "usuario",
+      "saldo": 1000,
+      "bonus": 0
+    },
+    {
+      "id": 3,
+      "nome": "Maria Apostadora",
+      "email": "maria@bet.com",
+      "senha": "123",
+      "perfil": "usuario",
+      "saldo": 1500,
+      "bonus": 0
+    }
+  ],
+  "eventos": [
+    {
+      "id": 1,
+      "timeA": "Brasil",
+      "timeB": "Argentina",
+      "esporte": "Futebol",
+      "data": "2026-06-20",
+      "status": "aberto",
+      "resultado": "",
+      "oddA": 1.8,
+      "oddB": 2.1
+    },
+    {
+      "id": 2,
+      "timeA": "Lakers",
+      "timeB": "Celtics",
+      "esporte": "Basquete",
+      "data": "2026-06-22",
+      "status": "aberto",
+      "resultado": "",
+      "oddA": 1.5,
+      "oddB": 2.6
+    },
+    {
+      "id": 3,
+      "timeA": "Brasil",
+      "timeB": "Itália",
+      "esporte": "Vôlei",
+      "data": "2026-06-18",
+      "status": "encerrado",
+      "resultado": "",
+      "oddA": 1.7,
+      "oddB": 2.2
+    }
+  ],
+  "apostas": [
+    {
+      "id": 1,
+      "usuarioId": 2,
+      "eventoId": 1,
+      "palpite": "Brasil",
+      "valor": 100,
+      "status": "pendente",
+      "retorno": 0,
+      "data": "2026-06-15"
+    }
+  ],
+  "movimentacoes": [
+    {
+      "id": 1,
+      "usuarioId": 2,
+      "tipo": "aposta",
+      "valor": -100,
+      "descricao": "Aposta no evento Brasil x Argentina",
+      "data": "2026-06-15"
+    }
+  ]
+}
