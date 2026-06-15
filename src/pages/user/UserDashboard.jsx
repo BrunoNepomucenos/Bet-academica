@@ -1,9 +1,20 @@
 import { useState, useEffect } from 'react'
-import { Row, Col, Card, Table, Alert } from 'react-bootstrap'
+import { Row, Col, Card, Table } from 'react-bootstrap'
 import { Link } from 'react-router-dom'
 import { listarApostasPorUsuario, listarMovimentacoesPorUsuario } from '../../services/apostas.js'
 import { useAuth } from '../../contexts/AuthContext.jsx'
 import Loader from '../../components/Loader.jsx'
+import StatCard from '../../components/StatCard.jsx'
+import EmptyState from '../../components/EmptyState.jsx'
+
+// Icone por tipo de movimentacao no extrato.
+const ICONE_MOV = {
+  aposta: '🎯',
+  premio: '🏆',
+  bonus: '🎁',
+  recarga: '💳',
+  estorno: '↩️',
+}
 
 // Painel-resumo do jogador: saldo, estatisticas e extrato (EXTRA) de movimentacoes.
 export default function UserDashboard() {
@@ -31,30 +42,25 @@ export default function UserDashboard() {
   const ganhas = apostas.filter((a) => a.status === 'ganha').length
   const perdidas = apostas.filter((a) => a.status === 'perdida').length
   const pendentes = apostas.filter((a) => a.status === 'pendente').length
-
-  const cards = [
-    { titulo: 'Saldo atual', valor: `R$ ${Number(usuario.saldo).toFixed(2)}`, cor: 'success' },
-    { titulo: 'Bônus recebido', valor: `R$ ${Number(usuario.bonus || 0).toFixed(2)}`, cor: 'info' },
-    { titulo: 'Apostas feitas', valor: total, cor: 'dark' },
-    { titulo: 'Apostas ganhas', valor: ganhas, cor: 'primary' },
-  ]
+  const totalGanho = apostas
+    .filter((a) => a.status === 'ganha')
+    .reduce((s, a) => s + Number(a.retorno), 0)
+  const aproveitamento = ganhas + perdidas > 0
+    ? Math.round((ganhas / (ganhas + perdidas)) * 100)
+    : 0
 
   return (
     <>
-      <h2 className="mb-1">Olá, {usuario.nome.split(' ')[0]}! 👋</h2>
-      <p className="text-muted">Acompanhe abaixo o resumo da sua conta.</p>
+      <div className="page-header">
+        <h2>Olá, {usuario.nome.split(' ')[0]}! <span className="page-title-accent">👋</span></h2>
+        <p className="text-muted mb-0">Acompanhe abaixo o resumo da sua conta.</p>
+      </div>
 
       <Row xs={2} md={4} className="g-3 mb-4">
-        {cards.map((c) => (
-          <Col key={c.titulo}>
-            <Card bg={c.cor} text="white" className="shadow-sm h-100">
-              <Card.Body>
-                <Card.Subtitle className="mb-2 small">{c.titulo}</Card.Subtitle>
-                <Card.Title className="fs-4">{c.valor}</Card.Title>
-              </Card.Body>
-            </Card>
-          </Col>
-        ))}
+        <Col><StatCard label="Saldo atual" valor={`R$ ${Number(usuario.saldo).toFixed(2)}`} icone="💰" gradiente="green" /></Col>
+        <Col><StatCard label="Total ganho" valor={`R$ ${totalGanho.toFixed(2)}`} icone="🏆" gradiente="purple" /></Col>
+        <Col><StatCard label="Apostas feitas" valor={total} icone="🎯" gradiente="blue" /></Col>
+        <Col><StatCard label="Aproveitamento" valor={`${aproveitamento}%`} icone="📈" gradiente="amber" /></Col>
       </Row>
 
       <Row className="g-3">
@@ -73,10 +79,13 @@ export default function UserDashboard() {
 
         <Col md={7}>
           <Card className="shadow-sm h-100">
-            <Card.Header className="fw-semibold">Extrato de movimentações</Card.Header>
+            <Card.Header className="fw-semibold d-flex justify-content-between align-items-center">
+              <span>Extrato de movimentações</span>
+              <Link to="/perfil" className="small text-decoration-none">Carteira →</Link>
+            </Card.Header>
             <Card.Body className="p-0">
               {movimentacoes.length === 0 ? (
-                <Alert variant="light" className="m-3 mb-0">Sem movimentações ainda.</Alert>
+                <EmptyState emoji="🧾" descricao="Sem movimentações ainda." />
               ) : (
                 <Table responsive hover className="mb-0 align-middle">
                   <thead className="table-light">
@@ -89,9 +98,9 @@ export default function UserDashboard() {
                   <tbody>
                     {movimentacoes.slice(0, 8).map((m) => (
                       <tr key={m.id}>
-                        <td className="small">{m.descricao}</td>
-                        <td className={m.valor >= 0 ? 'text-success' : 'text-danger'}>
-                          R$ {Number(m.valor).toFixed(2)}
+                        <td className="small">{ICONE_MOV[m.tipo] || '•'} {m.descricao}</td>
+                        <td className={m.valor >= 0 ? 'text-success fw-semibold' : 'text-danger fw-semibold'}>
+                          {m.valor >= 0 ? '+' : ''}R$ {Number(m.valor).toFixed(2)}
                         </td>
                         <td className="small">
                           {m.data ? new Date(m.data).toLocaleDateString('pt-BR') : '-'}

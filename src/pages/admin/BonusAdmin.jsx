@@ -55,7 +55,10 @@ export default function BonusAdmin() {
 
   return (
     <>
-      <h2 className="mb-3">Sistema de Bônus</h2>
+      <div className="page-header">
+        <h2>Sistema de <span className="page-title-accent">Bônus</span></h2>
+        <p className="text-muted mb-0">Conceda bônus fictícios aos jogadores da plataforma.</p>
+      </div>
       <Row className="g-4">
         <Col lg={4}>
           <Card className="shadow-sm">

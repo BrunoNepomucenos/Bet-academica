@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from 'react'
-import { Row, Col, Alert } from 'react-bootstrap'
+import { Row, Col, Form, InputGroup } from 'react-bootstrap'
 import { listarEventos } from '../../services/eventos.js'
 import {
   criarAposta,
@@ -10,10 +10,10 @@ import { useAuth } from '../../contexts/AuthContext.jsx'
 import { useToast } from '../../contexts/ToastContext.jsx'
 import EventoCard from '../../components/EventoCard.jsx'
 import ApostaModal from '../../components/ApostaModal.jsx'
-import FiltroEsporte from '../../components/FiltroEsporte.jsx'
 import Loader from '../../components/Loader.jsx'
+import EmptyState from '../../components/EmptyState.jsx'
 
-// Tela do jogador: lista eventos, filtra por esporte (EXTRA) e permite apostar.
+// Tela do jogador: lista eventos, filtra por esporte (EXTRA), busca e permite apostar.
 export default function EventosDisponiveis() {
   const { usuario, atualizarUsuario: atualizarSessao } = useAuth()
   const { notificar } = useToast()
@@ -21,6 +21,8 @@ export default function EventosDisponiveis() {
   const [eventos, setEventos] = useState([])
   const [carregando, setCarregando] = useState(true)
   const [filtro, setFiltro] = useState('todos')
+  const [busca, setBusca] = useState('')
+  const [soAbertos, setSoAbertos] = useState(false)
   const [eventoSelecionado, setEventoSelecionado] = useState(null)
 
   useEffect(() => {
@@ -34,16 +36,22 @@ export default function EventosDisponiveis() {
     setCarregando(false)
   }
 
-  // Lista de esportes unicos para alimentar o filtro.
+  // Lista de esportes unicos para alimentar o filtro (chips).
   const esportes = useMemo(
-    () => [...new Set(eventos.map((e) => e.esporte))],
+    () => ['todos', ...new Set(eventos.map((e) => e.esporte))],
     [eventos]
   )
 
-  const eventosFiltrados = useMemo(
-    () => (filtro === 'todos' ? eventos : eventos.filter((e) => e.esporte === filtro)),
-    [eventos, filtro]
-  )
+  const eventosFiltrados = useMemo(() => {
+    return eventos.filter((e) => {
+      const casaEsporte = filtro === 'todos' || e.esporte === filtro
+      const casaBusca =
+        !busca ||
+        `${e.timeA} ${e.timeB}`.toLowerCase().includes(busca.toLowerCase())
+      const casaStatus = !soAbertos || e.status === 'aberto'
+      return casaEsporte && casaBusca && casaStatus
+    })
+  }, [eventos, filtro, busca, soAbertos])
 
   // Processa a aposta: debita saldo, cria a aposta e registra a movimentacao.
   async function confirmarAposta({ palpite, valor, odd }) {
@@ -72,7 +80,7 @@ export default function EventosDisponiveis() {
       })
 
       atualizarSessao({ saldo: novoSaldo })
-      notificar('Aposta realizada com sucesso!', 'success')
+      notificar('Aposta realizada com sucesso! 🎉', 'success')
       setEventoSelecionado(null)
     } catch {
       notificar('Erro ao registrar a aposta.', 'danger')
@@ -83,16 +91,49 @@ export default function EventosDisponiveis() {
 
   return (
     <>
-      <div className="d-flex flex-wrap justify-content-between align-items-end">
-        <div>
-          <h2 className="mb-1">Eventos Disponíveis</h2>
-          <p className="text-muted">Escolha um evento aberto e faça sua aposta fictícia.</p>
+      <div className="page-header">
+        <h2>Eventos <span className="page-title-accent">Disponíveis</span></h2>
+        <p className="text-muted mb-0">Escolha um evento aberto e faça sua aposta fictícia.</p>
+      </div>
+
+      {/* Filtros: chips de esporte + busca + toggle */}
+      <div className="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-3">
+        <div className="d-flex flex-wrap gap-2">
+          {esportes.map((esp) => (
+            <span
+              key={esp}
+              className={`chip ${filtro === esp ? 'active' : ''}`}
+              onClick={() => setFiltro(esp)}
+            >
+              {esp === 'todos' ? 'Todos' : esp}
+            </span>
+          ))}
         </div>
-        <FiltroEsporte esportes={esportes} valor={filtro} onChange={setFiltro} />
+        <div className="d-flex align-items-center gap-3">
+          <Form.Check
+            type="switch"
+            id="so-abertos"
+            label="Só abertos"
+            checked={soAbertos}
+            onChange={(e) => setSoAbertos(e.target.checked)}
+          />
+          <InputGroup style={{ maxWidth: 260 }}>
+            <InputGroup.Text>🔎</InputGroup.Text>
+            <Form.Control
+              placeholder="Buscar time..."
+              value={busca}
+              onChange={(e) => setBusca(e.target.value)}
+            />
+          </InputGroup>
+        </div>
       </div>
 
       {eventosFiltrados.length === 0 ? (
-        <Alert variant="info">Nenhum evento encontrado para este filtro.</Alert>
+        <EmptyState
+          emoji="🔍"
+          titulo="Nenhum evento encontrado"
+          descricao="Tente outro esporte ou limpe a busca."
+        />
       ) : (
         <Row xs={1} md={2} lg={3} className="g-4">
           {eventosFiltrados.map((evento) => (
