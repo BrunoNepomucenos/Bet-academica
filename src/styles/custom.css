@@ -1,0 +1,28 @@
+/* Estilos complementares ao Bootstrap */
+
+body {
+  background-color: #f4f6f9;
+}
+
+.navbar-brand {
+  font-weight: 700;
+}
+
+/* Destaque suave ao passar o mouse nos cards de evento */
+.card {
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.card:hover {
+  transform: translateY(-2px);
+}
+
+/* Link ativo do menu */
+.nav-link.active {
+  font-weight: 600;
+  text-decoration: underline;
+}
+
+main {
+  min-height: calc(100vh - 56px);
+}
