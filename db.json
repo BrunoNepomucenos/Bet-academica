@@ -26,6 +26,15 @@
       "perfil": "usuario",
       "saldo": 1500,
       "bonus": 0
+    },
+    {
+      "id": 4,
+      "nome": "Carlos Sortudo",
+      "email": "carlos@bet.com",
+      "senha": "123",
+      "perfil": "usuario",
+      "saldo": 800,
+      "bonus": 200
     }
   ],
   "eventos": [
@@ -61,6 +70,39 @@
       "resultado": "",
       "oddA": 1.7,
       "oddB": 2.2
+    },
+    {
+      "id": 4,
+      "timeA": "Djokovic",
+      "timeB": "Alcaraz",
+      "esporte": "Tênis",
+      "data": "2026-06-25",
+      "status": "aberto",
+      "resultado": "",
+      "oddA": 2.0,
+      "oddB": 1.7
+    },
+    {
+      "id": 5,
+      "timeA": "LOUD",
+      "timeB": "FURIA",
+      "esporte": "E-Sports",
+      "data": "2026-06-28",
+      "status": "aberto",
+      "resultado": "",
+      "oddA": 1.9,
+      "oddB": 1.9
+    },
+    {
+      "id": 6,
+      "timeA": "Real Madrid",
+      "timeB": "Barcelona",
+      "esporte": "Futebol",
+      "data": "2026-06-10",
+      "status": "finalizado",
+      "resultado": "Real Madrid",
+      "oddA": 2.2,
+      "oddB": 1.6
     }
   ],
   "apostas": [
@@ -70,9 +112,32 @@
       "eventoId": 1,
       "palpite": "Brasil",
       "valor": 100,
+      "odd": 1.8,
       "status": "pendente",
       "retorno": 0,
       "data": "2026-06-15"
+    },
+    {
+      "id": 2,
+      "usuarioId": 2,
+      "eventoId": 6,
+      "palpite": "Real Madrid",
+      "valor": 50,
+      "odd": 2.2,
+      "status": "ganha",
+      "retorno": 110,
+      "data": "2026-06-09"
+    },
+    {
+      "id": 3,
+      "usuarioId": 3,
+      "eventoId": 6,
+      "palpite": "Barcelona",
+      "valor": 80,
+      "odd": 1.6,
+      "status": "perdida",
+      "retorno": 0,
+      "data": "2026-06-09"
     }
   ],
   "movimentacoes": [
@@ -81,8 +146,32 @@
       "usuarioId": 2,
       "tipo": "aposta",
       "valor": -100,
-      "descricao": "Aposta no evento Brasil x Argentina",
+      "descricao": "Aposta em Brasil x Argentina (palpite: Brasil)",
       "data": "2026-06-15"
+    },
+    {
+      "id": 2,
+      "usuarioId": 2,
+      "tipo": "aposta",
+      "valor": -50,
+      "descricao": "Aposta em Real Madrid x Barcelona (palpite: Real Madrid)",
+      "data": "2026-06-09"
+    },
+    {
+      "id": 3,
+      "usuarioId": 2,
+      "tipo": "premio",
+      "valor": 110,
+      "descricao": "Prêmio: Real Madrid x Barcelona (acertou Real Madrid)",
+      "data": "2026-06-10"
+    },
+    {
+      "id": 4,
+      "usuarioId": 3,
+      "tipo": "aposta",
+      "valor": -80,
+      "descricao": "Aposta em Real Madrid x Barcelona (palpite: Barcelona)",
+      "data": "2026-06-09"
     }
   ]
 }
