@@ -1,5 +1,5 @@
 import { createContext, useContext, useState, useEffect } from 'react'
-import { login as loginService } from '../services/usuarios.js'
+import { login as loginService, buscarUsuario } from '../services/usuarios.js'
 
 // Context responsavel pela autenticacao simulada e pelo usuario logado.
 const AuthContext = createContext(null)
@@ -10,13 +10,35 @@ export function AuthProvider({ children }) {
   const [usuario, setUsuario] = useState(null)
   const [carregando, setCarregando] = useState(true)
 
-  // Recupera a sessao salva no localStorage ao iniciar a aplicacao.
+  // Recupera a sessao salva no localStorage ao iniciar e REVALIDA no backend.
+  // Isso evita o erro 404 ao apostar/recarregar quando a conta nao existe mais
+  // no servidor (o JSON Server do Render reinicia periodicamente no plano free e
+  // reseta o db.json, apagando contas criadas no site). Em caso de erro temporario
+  // (backend "dormindo"), mantemos a sessao do cache para nao deslogar a toa.
   useEffect(() => {
     const salvo = localStorage.getItem(STORAGE_KEY)
-    if (salvo) {
-      setUsuario(JSON.parse(salvo))
+    if (!salvo) {
+      setCarregando(false)
+      return
     }
-    setCarregando(false)
+    const cache = JSON.parse(salvo)
+    setUsuario(cache) // mostra rapido enquanto revalida
+
+    buscarUsuario(cache.id)
+      .then((fresco) => {
+        // Conta existe: atualiza com os dados atuais (saldo/bonus) do servidor.
+        setUsuario(fresco)
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(fresco))
+      })
+      .catch((err) => {
+        if (err?.response?.status === 404) {
+          // A conta nao existe mais no servidor: encerra a sessao.
+          localStorage.removeItem(STORAGE_KEY)
+          setUsuario(null)
+        }
+        // Outros erros (rede/backend dormindo): mantem a sessao do cache.
+      })
+      .finally(() => setCarregando(false))
   }, [])
 
   // Login simulado: valida email e senha contra o JSON Server.

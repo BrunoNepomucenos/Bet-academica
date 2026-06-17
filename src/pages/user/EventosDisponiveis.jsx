@@ -86,10 +86,17 @@ export default function EventosDisponiveis() {
     } catch (err) {
       // Mostra a causa real (ex.: backend dormindo/offline) em vez de uma mensagem generica.
       console.error("Falha ao apostar:", err);
-      const motivo =
-        err?.message === "Network Error"
-          ? "Servidor indisponivel. Aguarde alguns segundos (o backend pode estar 'acordando') e tente de novo."
-          : err?.message || "tente novamente";
+      let motivo;
+      if (err?.response?.status === 404) {
+        // Conta nao existe mais no servidor (backend reiniciou e resetou os dados).
+        motivo =
+          "sua conta nao foi encontrada no servidor (o backend gratuito reinicia de tempos em tempos). Faca login novamente.";
+      } else if (err?.message === "Network Error") {
+        motivo =
+          "Servidor indisponivel. Aguarde alguns segundos (o backend pode estar 'acordando') e tente de novo.";
+      } else {
+        motivo = err?.message || "tente novamente";
+      }
       notificar(`Erro ao registrar a aposta: ${motivo}`, "danger");
     }
   }
