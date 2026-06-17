@@ -1,6 +1,6 @@
-import Navbar from './components/Navbar.jsx'
-import Footer from './components/Footer.jsx'
-import AppRoutes from './routes/AppRoutes.jsx'
+import Navbar from "./components/Navbar.jsx";
+import Footer from "./components/Footer.jsx";
+import AppRoutes from "./routes/AppRoutes.jsx";
 
 // Componente raiz: barra de navegacao fixa + area de rotas + rodape.
 // Layout em coluna para manter o footer sempre ao final da pagina.
@@ -13,5 +13,5 @@ export default function App() {
       </main>
       <Footer />
     </div>
-  )
+  );
 }

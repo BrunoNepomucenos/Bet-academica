@@ -6,6 +6,8 @@ import { useAuth } from '../../contexts/AuthContext.jsx'
 import Loader from '../../components/Loader.jsx'
 import StatCard from '../../components/StatCard.jsx'
 import EmptyState from '../../components/EmptyState.jsx'
+import react from 'react'
+import { Hand } from 'lucide-react'
 
 // Icone por tipo de movimentacao no extrato.
 const ICONE_MOV = {
@@ -52,7 +54,11 @@ export default function UserDashboard() {
   return (
     <>
       <div className="page-header">
-        <h2>Olá, {usuario.nome.split(' ')[0]}! <span className="page-title-accent">👋</span></h2>
+        <h2>Olá, {usuario.nome.split(' ')[0]}! 
+          <div>
+            <Hand size={28} className="wave-hand" />
+          </div>
+          </h2>
         <p className="text-muted mb-0">Acompanhe abaixo o resumo da sua conta.</p>
       </div>
 
