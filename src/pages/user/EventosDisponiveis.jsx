@@ -82,8 +82,14 @@ export default function EventosDisponiveis() {
       atualizarSessao({ saldo: novoSaldo });
       notificar("Aposta realizada com sucesso! 🎉", "success");
       setEventoSelecionado(null);
-    } catch {
-      notificar("Erro ao registrar a aposta.", "danger");
+    } catch (err) {
+      // Mostra a causa real (ex.: backend dormindo/offline) em vez de uma mensagem generica.
+      console.error("Falha ao apostar:", err);
+      const motivo =
+        err?.message === "Network Error"
+          ? "Servidor indisponivel. Aguarde alguns segundos (o backend pode estar 'acordando') e tente de novo."
+          : err?.message || "tente novamente";
+      notificar(`Erro ao registrar a aposta: ${motivo}`, "danger");
     }
   }
 
