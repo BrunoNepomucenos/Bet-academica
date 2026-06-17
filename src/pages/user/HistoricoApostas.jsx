@@ -142,6 +142,7 @@ export default function HistoricoApostas() {
             <thead className="table-dark">
               <tr>
                 <th>Evento</th>
+                <th>Mercado</th>
                 <th>Palpite</th>
                 <th>Valor</th>
                 <th>Status</th>
@@ -159,6 +160,11 @@ export default function HistoricoApostas() {
                       {evento
                         ? `${evento.timeA} × ${evento.timeB}`
                         : "Evento removido"}
+                    </td>
+                    <td>
+                      <span className="text-muted small">
+                        {aposta.mercadoNome || "Vencedor"}
+                      </span>
                     </td>
                     <td>{aposta.palpite}</td>
                     <td>R$ {Number(aposta.valor).toFixed(2)}</td>

@@ -12,6 +12,7 @@ import {
   registrarMovimentacao,
 } from '../../services/apostas.js'
 import { buscarUsuario, atualizarUsuario } from '../../services/usuarios.js'
+import { getMercados } from '../../config/mercados.js'
 import { useToast } from '../../contexts/ToastContext.jsx'
 import StatusBadge from '../../components/StatusBadge.jsx'
 import Loader from '../../components/Loader.jsx'
@@ -37,6 +38,12 @@ export default function EventosAdmin() {
 
   const [eventoResultado, setEventoResultado] = useState(null)
   const [eventoExcluir, setEventoExcluir] = useState(null)
+
+  // Apuracao por mercado: lista de mercados que receberam apostas no evento
+  // selecionado e o resultado escolhido pelo admin para cada um.
+  const [mercadosApuracao, setMercadosApuracao] = useState([])
+  const [vencedores, setVencedores] = useState({})
+  const [processando, setProcessando] = useState(false)
 
   // Ao montar a tela, busca os eventos uma vez.
   useEffect(() => {
@@ -116,9 +123,42 @@ export default function EventosAdmin() {
     }
   }
 
-  // Processa o resultado: define vencedor, atualiza apostas e credita os ganhadores.
-  async function confirmarResultado(vencedor) {
+  // Abre o modal de resultado: descobre quais mercados receberam apostas neste
+  // evento para que o admin defina o resultado de cada um (placar, gols, cartoes...).
+  async function abrirResultado(evento) {
+    setEventoResultado(evento)
+    setMercadosApuracao([])
+    setVencedores({})
+    try {
+      const apostas = await listarApostasPorEvento(evento.id)
+      const pendentes = apostas.filter((a) => a.status === 'pendente')
+
+      // Ids de mercados que tem aposta pendente (apostas antigas viram 'vencedor').
+      const idsComAposta = new Set(pendentes.map((a) => a.mercado || 'vencedor'))
+      // 'vencedor' sempre presente: e ele que registra o resultado do evento.
+      idsComAposta.add('vencedor')
+
+      // Mantem so os mercados do esporte que de fato receberam apostas.
+      const mercados = getMercados(evento).filter((m) => idsComAposta.has(m.id))
+
+      // Resultado inicial de cada mercado = primeira opcao (o admin ajusta).
+      const inicial = {}
+      mercados.forEach((m) => {
+        inicial[m.id] = m.opcoes[0].label
+      })
+
+      setMercadosApuracao(mercados)
+      setVencedores(inicial)
+    } catch {
+      notificar('Erro ao carregar as apostas do evento.', 'danger')
+    }
+  }
+
+  // Processa o resultado: para cada mercado com apostas, o admin escolheu a opcao
+  // vencedora; aqui apuramos aposta por aposta, creditando quem acertou.
+  async function confirmarResultado() {
     const evento = eventoResultado
+    setProcessando(true)
     try {
       // 1) Pega todas as apostas feitas neste evento.
       const apostas = await listarApostasPorEvento(evento.id)
@@ -128,8 +168,14 @@ export default function EventosAdmin() {
         // Ignora apostas que ja foram resolvidas ou canceladas (so processa pendentes).
         if (aposta.status !== 'pendente') continue
 
-        // Acertou se o palpite do jogador foi o time vencedor escolhido pelo admin.
-        const acertou = aposta.palpite === vencedor
+        // Resultado escolhido pelo admin para o mercado desta aposta.
+        const mercadoId = aposta.mercado || 'vencedor'
+        const opcaoVencedora = vencedores[mercadoId]
+        // Sem resultado definido para esse mercado: deixa pendente.
+        if (opcaoVencedora == null) continue
+
+        // Acertou se o palpite do jogador bate com a opcao vencedora do mercado.
+        const acertou = aposta.palpite === opcaoVencedora
         // Premio = valor apostado x odd (so quem acertou ganha; arredonda a 2 casas).
         const retorno = acertou ? Number((aposta.valor * (aposta.odd || 1)).toFixed(2)) : 0
 
@@ -148,19 +194,25 @@ export default function EventosAdmin() {
             usuarioId: jogador.id,
             tipo: 'premio',
             valor: retorno,
-            descricao: `Prêmio: ${evento.timeA} x ${evento.timeB} (acertou ${vencedor})`,
+            descricao: `Prêmio: ${evento.timeA} x ${evento.timeB} (${aposta.mercadoNome || 'Vencedor'}: ${opcaoVencedora})`,
             data: new Date().toISOString().slice(0, 10),
           })
         }
       }
 
-      // 3) Por fim, fecha o evento: status 'finalizado' e registra o vencedor.
-      await atualizarEvento(evento.id, { status: 'finalizado', resultado: vencedor })
+      // 3) Por fim, fecha o evento: status 'finalizado' e registra o vencedor
+      //    (opcao vencedora do mercado de resultado final).
+      await atualizarEvento(evento.id, {
+        status: 'finalizado',
+        resultado: vencedores.vencedor || '',
+      })
       notificar('Resultado lançado e apostas atualizadas!', 'success')
       setEventoResultado(null)
       carregar()
     } catch {
       notificar('Erro ao processar o resultado.', 'danger')
+    } finally {
+      setProcessando(false)
     }
   }
 
@@ -277,7 +329,7 @@ export default function EventosAdmin() {
                           )}
                           {evento.status !== 'finalizado' && (
                             <Button size="sm" variant="primary" className="me-1 mb-1"
-                              onClick={() => setEventoResultado(evento)}>
+                              onClick={() => abrirResultado(evento)}>
                               Resultado
                             </Button>
                           )}
@@ -296,27 +348,49 @@ export default function EventosAdmin() {
         </Col>
       </Row>
 
-      {/* Modal para lancar o resultado */}
-      <Modal show={!!eventoResultado} onHide={() => setEventoResultado(null)} centered>
+      {/* Modal para lancar o resultado de cada mercado com apostas */}
+      <Modal show={!!eventoResultado} onHide={() => setEventoResultado(null)} centered scrollable>
         <Modal.Header closeButton>
           <Modal.Title>Lançar resultado</Modal.Title>
         </Modal.Header>
         {eventoResultado && (
           <Modal.Body>
-            <p>Quem venceu <strong>{eventoResultado.timeA} × {eventoResultado.timeB}</strong>?</p>
-            <p className="text-muted small">
-              Ao confirmar, as apostas pendentes serão atualizadas e os ganhadores receberão o prêmio.
+            <p className="mb-1">
+              <strong>{eventoResultado.timeA} × {eventoResultado.timeB}</strong>
             </p>
-            <div className="d-grid gap-2">
-              <Button variant="success" onClick={() => confirmarResultado(eventoResultado.timeA)}>
-                {eventoResultado.timeA}
-              </Button>
-              <Button variant="success" onClick={() => confirmarResultado(eventoResultado.timeB)}>
-                {eventoResultado.timeB}
-              </Button>
-            </div>
+            <p className="text-muted small">
+              Defina o resultado de cada mercado que recebeu apostas. Ao confirmar,
+              as apostas pendentes serão apuradas e os ganhadores receberão o prêmio.
+            </p>
+            {mercadosApuracao.map((m) => (
+              <Form.Group className="mb-3" key={m.id}>
+                <Form.Label className="fw-semibold mb-1">
+                  {m.icone} {m.nome}
+                </Form.Label>
+                <Form.Select
+                  value={vencedores[m.id] || ''}
+                  onChange={(e) =>
+                    setVencedores((v) => ({ ...v, [m.id]: e.target.value }))
+                  }
+                >
+                  {m.opcoes.map((o) => (
+                    <option key={o.label} value={o.label}>
+                      {o.label}
+                    </option>
+                  ))}
+                </Form.Select>
+              </Form.Group>
+            ))}
           </Modal.Body>
         )}
+        <Modal.Footer>
+          <Button variant="secondary" onClick={() => setEventoResultado(null)} disabled={processando}>
+            Cancelar
+          </Button>
+          <Button variant="success" onClick={confirmarResultado} disabled={processando}>
+            {processando ? 'Processando…' : 'Confirmar resultado'}
+          </Button>
+        </Modal.Footer>
       </Modal>
 
       {/* Confirmacao de exclusao */}

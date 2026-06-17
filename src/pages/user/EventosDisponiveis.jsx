@@ -53,13 +53,15 @@ export default function EventosDisponiveis() {
   }, [eventos, filtro, busca, soAbertos]);
 
   // Processa a aposta: debita saldo, cria a aposta e registra a movimentacao.
-  async function confirmarAposta({ palpite, valor, odd }) {
+  async function confirmarAposta({ mercado, mercadoNome, palpite, valor, odd }) {
     try {
       const novoSaldo = usuario.saldo - valor;
 
       await criarAposta({
         usuarioId: usuario.id,
         eventoId: eventoSelecionado.id,
+        mercado,
+        mercadoNome,
         palpite,
         valor,
         odd,
@@ -74,7 +76,7 @@ export default function EventosDisponiveis() {
         usuarioId: usuario.id,
         tipo: "aposta",
         valor: -valor,
-        descricao: `Aposta em ${eventoSelecionado.timeA} x ${eventoSelecionado.timeB} (palpite: ${palpite})`,
+        descricao: `Aposta em ${eventoSelecionado.timeA} x ${eventoSelecionado.timeB} (${mercadoNome}: ${palpite})`,
         data: new Date().toISOString().slice(0, 10),
       });
 

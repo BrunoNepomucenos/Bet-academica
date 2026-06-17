@@ -335,6 +335,13 @@ body {
   transition: all 0.15s ease;
   white-space: nowrap;
 }
+/* Permite usar .chip tambem em <button> (modal de aposta) sem herdar o
+   estilo padrao do navegador. */
+button.chip {
+  font-family: inherit;
+  line-height: 1.4;
+  color: inherit;
+}
 .chip:hover {
   border-color: var(--bet-primary);
 }
