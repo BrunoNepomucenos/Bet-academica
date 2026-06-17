@@ -22,19 +22,30 @@
   --bet-shadow: 0 10px 30px -12px rgba(15, 23, 42, 0.25);
   --bet-shadow-hover: 0 18px 40px -14px rgba(15, 23, 42, 0.35);
   --bet-surface: #ffffff;
-  --bet-body-bg: #eef2f7;
+  --bet-body-bg: #f1f7ee;
   --bet-border: rgba(15, 23, 42, 0.08);
+  --bs-body-color: #c9cfd8;
+  --bs-secondary-color: #b6bcc7;
+  --nav-gradient: radial-gradient(circle,
+  rgba(22, 199, 132, 1) 20%,
+  rgba(63, 147, 180, 1) 50%,
+  rgba(108, 92, 231, 1) 90%);
 }
 
 /* ---- Modo escuro ---- */
 [data-bs-theme="dark"] {
   --bet-surface: #1b2333;
-  --bet-body-bg: #0f1623;
+  --bet-body-bg: #1a0f23;
   --bet-border: rgba(255, 255, 255, 0.08);
   --bet-shadow: 0 10px 30px -12px rgba(0, 0, 0, 0.6);
   --bet-shadow-hover: 0 18px 40px -14px rgba(0, 0, 0, 0.7);
   --bs-body-bg: var(--bet-body-bg);
-  --bs-body-color: #e7ecf3;
+  --bs-body-color: #e1e5ea;
+  --bs-secondary-color: rgba(200, 203, 208, 0.82);
+  --nav-gradient: radial-gradient(circle,
+  rgba(108, 92, 231, 1) 20%,
+  rgba(69, 140, 186, 1) 50%,
+  rgba(22, 199, 132, 1) 90%);
 }
 
 * {
@@ -42,6 +53,7 @@
 }
 
 body {
+  color: var(--bs-body-color);
   font-family:
     "Inter",
     system-ui,
@@ -50,17 +62,8 @@ body {
     Roboto,
     sans-serif;
   background-color: var(--bet-body-bg);
-  background-image:
-    radial-gradient(
-      900px circle at 100% -10%,
-      rgba(108, 92, 231, 0.1),
-      transparent 45%
-    ),
-    radial-gradient(
-      900px circle at 0% 0%,
-      rgba(22, 199, 132, 0.1),
-      transparent 40%
-    );
+  background-image: url(../public/bg.jpg);
+  background-size: cover;
   background-attachment: fixed;
   min-height: 100vh;
   transition:
@@ -81,17 +84,18 @@ body {
   letter-spacing: -0.02em;
 }
 .page-title-accent {
-  background: var(--bet-gradient);
+  background: #ffff;
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
 }
 
 /* ============================ Navbar ============================ */
+
 .bet-navbar {
-  background: rgba(13, 18, 28, 0.85) !important;
+  background: var(--nav-gradient) !important;
   backdrop-filter: blur(14px);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  border-bottom: 1px solid  rgba(255, 255, 255, 0.06);
 }
 .bet-navbar .navbar-brand {
   font-weight: 800;
@@ -135,6 +139,7 @@ body {
 
 /* ============================ Cards ============================ */
 .card {
+  color: var(--card-color);
   border: 1px solid var(--bet-border);
   border-radius: var(--bet-radius);
   background-color: var(--bet-surface);
@@ -294,6 +299,7 @@ body {
   color: var(--bs-secondary-color);
   padding: 1.25rem 0;
   font-size: 0.875rem;
+  color: #6a6f76;
 }
 
 /* ============================ Animações ============================ */
@@ -371,19 +377,35 @@ body {
 }
 
 @keyframes wave {
-  0% { transform: rotate( 0.0deg) }
-  10% { transform: rotate(14.0deg) }
-  20% { transform: rotate(-8.0deg) }
-  30% { transform: rotate(14.0deg) }
-  40% { transform: rotate(-4.0deg) }
-  50% { transform: rotate(10.0deg) }
-  60% { transform: rotate( 0.0deg) }
-  100% { transform: rotate( 0.0deg) }
+  0% {
+    transform: rotate(0deg);
+  }
+  10% {
+    transform: rotate(14deg);
+  }
+  20% {
+    transform: rotate(-8deg);
+  }
+  30% {
+    transform: rotate(14deg);
+  }
+  40% {
+    transform: rotate(-4deg);
+  }
+  50% {
+    transform: rotate(10deg);
+  }
+  60% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(0deg);
+  }
 }
 
-.wave-hand{
+.wave-hand {
   animation: wave 2.5s infinite;
-  transform-origin: 70% 70%; 
+  transform-origin: 70% 70%;
   display: inline-block;
   color: #16c784;
 }

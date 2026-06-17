@@ -10,7 +10,7 @@ export default function Footer() {
           <TriangleAlert size={25} color='#cc7d0f' /> Plataforma 100% fictícia · sem dinheiro real, PIX ou cartão · uso educacional
         </span>
         <span className="small">
-          👨‍💻 Criado por <strong>Bruno Souza</strong> e <strong>Cícero</strong> · © {new Date().getFullYear()}
+          👨‍💻 Criado por <strong>Bruno Souza</strong> e <strong>Cícero Gomes</strong> · © {new Date().getFullYear()}
         </span>
       </div>
     </footer>
