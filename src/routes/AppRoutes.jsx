@@ -15,21 +15,31 @@ import HistoricoApostas from '../pages/user/HistoricoApostas.jsx'
 import Ranking from '../pages/user/Ranking.jsx'
 import Perfil from '../pages/user/Perfil.jsx'
 
-// Redireciona a rota raiz conforme o perfil (ou login se nao autenticado).
+// Componente da rota raiz ("/"). Funciona como um "porteiro" de entrada:
+// - se ninguem esta logado, manda para a tela de login;
+// - se ja esta logado, manda para a area certa de acordo com o perfil
+//   (admin vai para /admin, jogador vai para /dashboard).
+// O atributo "replace" troca a entrada atual no historico do navegador,
+// para o botao "voltar" nao trazer o usuario de volta para esta tela tecnica.
 function Inicio() {
   const { autenticado, isAdmin } = useAuth()
   if (!autenticado) return <Navigate to="/login" replace />
   return <Navigate to={isAdmin ? '/admin' : '/dashboard'} replace />
 }
 
+// Tabela central de rotas da aplicacao (SPA - troca de telas sem recarregar a pagina).
+// Cada <Route> liga uma URL (path) a um componente (element).
+// Rotas protegidas sao "embrulhadas" em PrivateRoute (precisa estar logado)
+// ou RoleRoute (precisa estar logado E ter o perfil certo).
 export default function AppRoutes() {
   return (
     <Routes>
+      {/* Rotas publicas: acessiveis sem login */}
       <Route path="/" element={<Inicio />} />
       <Route path="/login" element={<Login />} />
       <Route path="/cadastro" element={<Cadastro />} />
 
-      {/* Pagina de regulamento: qualquer usuario autenticado (EXTRA) */}
+      {/* Pagina de regulamento: qualquer usuario autenticado, sem importar o perfil (EXTRA) */}
       <Route
         path="/regulamento"
         element={
@@ -39,7 +49,7 @@ export default function AppRoutes() {
         }
       />
 
-      {/* Area do Administrador */}
+      {/* Area do Administrador: RoleRoute perfil="admin" bloqueia jogadores comuns */}
       <Route
         path="/admin"
         element={
@@ -65,7 +75,7 @@ export default function AppRoutes() {
         }
       />
 
-      {/* Area do Usuario/Jogador */}
+      {/* Area do Usuario/Jogador: RoleRoute perfil="usuario" bloqueia o admin */}
       <Route
         path="/dashboard"
         element={
@@ -107,7 +117,8 @@ export default function AppRoutes() {
         }
       />
 
-      {/* Qualquer rota desconhecida volta para o inicio */}
+      {/* Curinga "*": qualquer URL que nao casou com nenhuma rota acima
+          (ex.: link quebrado) cai aqui e e redirecionada para o inicio */}
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   )

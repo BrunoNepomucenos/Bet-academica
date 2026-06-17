@@ -38,13 +38,17 @@ export default function UserDashboard() {
 
   if (carregando) return <Loader texto="Carregando painel..." />
 
+  // --- Estatisticas pessoais do jogador, derivadas das suas apostas ---
   const total = apostas.length
   const ganhas = apostas.filter((a) => a.status === 'ganha').length
   const perdidas = apostas.filter((a) => a.status === 'perdida').length
   const pendentes = apostas.filter((a) => a.status === 'pendente').length
+  // Soma os retornos das apostas vencedoras (quanto o jogador ja "lucrou").
   const totalGanho = apostas
     .filter((a) => a.status === 'ganha')
     .reduce((s, a) => s + Number(a.retorno), 0)
+  // Aproveitamento = % de acertos sobre as apostas ja resolvidas (ignora pendentes).
+  // So calcula se houver ganhas/perdidas, senao evita divisao por zero retornando 0.
   const aproveitamento = ganhas + perdidas > 0
     ? Math.round((ganhas / (ganhas + perdidas)) * 100)
     : 0

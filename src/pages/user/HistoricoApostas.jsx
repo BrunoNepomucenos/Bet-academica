@@ -37,15 +37,20 @@ export default function HistoricoApostas() {
     carregar()
   }, [usuario.id])
 
+  // Carrega apostas do jogador + eventos em paralelo (Promise.all e mais rapido
+  // que esperar uma de cada vez).
   async function carregar() {
     setCarregando(true)
     const [listaApostas, listaEventos] = await Promise.all([
       listarApostasPorUsuario(usuario.id),
       listarEventos(),
     ])
+    // Monta um "mapa" { id: evento } para encontrar o evento de cada aposta em O(1),
+    // sem precisar varrer a lista de eventos a cada linha da tabela.
     const mapa = {}
     listaEventos.forEach((e) => { mapa[e.id] = e })
     setEventos(mapa)
+    // .reverse() mostra as apostas mais recentes primeiro.
     setApostas(listaApostas.reverse())
     setCarregando(false)
   }

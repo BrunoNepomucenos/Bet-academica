@@ -31,10 +31,14 @@ export default function AdminDashboard() {
 
   if (carregando) return <Loader texto="Carregando painel..." />
 
+  // --- Indicadores calculados a partir dos dados carregados (derivados, nao guardados em estado) ---
+  // Soma de tudo que foi apostado na plataforma.
   const volumeApostado = apostas.reduce((soma, a) => soma + Number(a.valor), 0)
+  // Contagem de apostas por status, para as barras de progresso.
   const ganhas = apostas.filter((a) => a.status === 'ganha').length
   const perdidas = apostas.filter((a) => a.status === 'perdida').length
   const pendentes = apostas.filter((a) => a.status === 'pendente').length
+  // "|| 1" evita divisao por zero ao calcular as porcentagens quando nao ha apostas.
   const totalApostas = apostas.length || 1
   const eventosAbertos = eventos.filter((e) => e.status === 'aberto').length
 

@@ -15,6 +15,8 @@ export default function Cadastro() {
   const [erro, setErro] = useState('')
   const [enviando, setEnviando] = useState(false)
 
+  // Atualiza no estado "form" apenas o campo que foi alterado, identificado
+  // pelo atributo "name" do input (nome, email, senha ou confirmar).
   function handleChange(e) {
     const { name, value } = e.target
     setForm((f) => ({ ...f, [name]: value }))
