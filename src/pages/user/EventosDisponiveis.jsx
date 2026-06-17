@@ -1,4 +1,3 @@
-import react from "react";
 import { Search } from "lucide-react";
 import { useState, useEffect, useMemo } from "react";
 import { Row, Col, Form, InputGroup } from "react-bootstrap";
