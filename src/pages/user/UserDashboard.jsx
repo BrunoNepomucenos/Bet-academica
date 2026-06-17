@@ -6,7 +6,6 @@ import { useAuth } from '../../contexts/AuthContext.jsx'
 import Loader from '../../components/Loader.jsx'
 import StatCard from '../../components/StatCard.jsx'
 import EmptyState from '../../components/EmptyState.jsx'
-import react from 'react'
 import { Hand } from 'lucide-react'
 
 // Icone por tipo de movimentacao no extrato.

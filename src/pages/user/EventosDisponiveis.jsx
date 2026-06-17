@@ -1,4 +1,3 @@
-import react from "react";
 import { Search } from "lucide-react";
 import { useState, useEffect, useMemo } from "react";
 import { Row, Col, Form, InputGroup } from "react-bootstrap";
@@ -54,13 +53,15 @@ export default function EventosDisponiveis() {
   }, [eventos, filtro, busca, soAbertos]);
 
   // Processa a aposta: debita saldo, cria a aposta e registra a movimentacao.
-  async function confirmarAposta({ palpite, valor, odd }) {
+  async function confirmarAposta({ mercado, mercadoNome, palpite, valor, odd }) {
     try {
       const novoSaldo = usuario.saldo - valor;
 
       await criarAposta({
         usuarioId: usuario.id,
         eventoId: eventoSelecionado.id,
+        mercado,
+        mercadoNome,
         palpite,
         valor,
         odd,
@@ -75,15 +76,21 @@ export default function EventosDisponiveis() {
         usuarioId: usuario.id,
         tipo: "aposta",
         valor: -valor,
-        descricao: `Aposta em ${eventoSelecionado.timeA} x ${eventoSelecionado.timeB} (palpite: ${palpite})`,
+        descricao: `Aposta em ${eventoSelecionado.timeA} x ${eventoSelecionado.timeB} (${mercadoNome}: ${palpite})`,
         data: new Date().toISOString().slice(0, 10),
       });
 
       atualizarSessao({ saldo: novoSaldo });
       notificar("Aposta realizada com sucesso! 🎉", "success");
       setEventoSelecionado(null);
-    } catch {
-      notificar("Erro ao registrar a aposta.", "danger");
+    } catch (err) {
+      // Mostra a causa real (ex.: backend dormindo/offline) em vez de uma mensagem generica.
+      console.error("Falha ao apostar:", err);
+      const motivo =
+        err?.message === "Network Error"
+          ? "Servidor indisponivel. Aguarde alguns segundos (o backend pode estar 'acordando') e tente de novo."
+          : err?.message || "tente novamente";
+      notificar(`Erro ao registrar a aposta: ${motivo}`, "danger");
     }
   }
 

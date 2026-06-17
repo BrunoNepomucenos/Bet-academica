@@ -1,8 +1,7 @@
-import {Scroll,TriangleAlert} from "lucide-react";
-  import react from "react";
-  import { Card, Accordion, Alert } from 'react-bootstrap'
+import { Scroll, TriangleAlert } from "lucide-react";
+import { Card, Accordion, Alert } from 'react-bootstrap'
 
-  // EXTRA: pagina de regulamento da plataforma (regras de negocio do sistema).
+// EXTRA: pagina de regulamento da plataforma (regras de negocio do sistema).
 const REGRAS = [
   {
     titulo: '1. Natureza acadêmica',
