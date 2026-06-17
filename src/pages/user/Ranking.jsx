@@ -35,8 +35,8 @@ export default function Ranking() {
       {jogadores.length === 0 ? (
         <EmptyState emoji="🏆" titulo="Sem jogadores" descricao="Nenhum jogador cadastrado ainda." />
       ) : (
-        <Card className="shadow-sm">
-          <Table responsive hover className="mb-0 align-middle text-center">
+        <Card className="border-2 border-success rounded-0 shadow-sm">
+          <Table responsive hover className="mb-0 align-middle text-center ">
             <thead className="table-dark">
               <tr>
                 <th>Posição</th>

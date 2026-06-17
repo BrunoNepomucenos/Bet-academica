@@ -33,7 +33,7 @@
       "email": "carlos@bet.com",
       "senha": "123",
       "perfil": "usuario",
-      "saldo": 800,
+      "saldo": 400,
       "bonus": 200
     }
   ],
@@ -79,7 +79,7 @@
       "data": "2026-06-25",
       "status": "aberto",
       "resultado": "",
-      "oddA": 2.0,
+      "oddA": 2,
       "oddB": 1.7
     },
     {
@@ -138,6 +138,17 @@
       "status": "perdida",
       "retorno": 0,
       "data": "2026-06-09"
+    },
+    {
+      "usuarioId": 4,
+      "eventoId": 1,
+      "palpite": "Brasil",
+      "valor": 400,
+      "odd": 1.8,
+      "status": "pendente",
+      "retorno": 0,
+      "data": "2026-06-16",
+      "id": 4
     }
   ],
   "movimentacoes": [
@@ -172,6 +183,14 @@
       "valor": -80,
       "descricao": "Aposta em Real Madrid x Barcelona (palpite: Barcelona)",
       "data": "2026-06-09"
+    },
+    {
+      "usuarioId": 4,
+      "tipo": "aposta",
+      "valor": -400,
+      "descricao": "Aposta em Brasil x Argentina (palpite: Brasil)",
+      "data": "2026-06-16",
+      "id": 5
     }
   ]
 }

@@ -1,6 +1,8 @@
-import { Card, Accordion, Alert } from 'react-bootstrap'
+import {Scroll,TriangleAlert} from "lucide-react";
+  import react from "react";
+  import { Card, Accordion, Alert } from 'react-bootstrap'
 
-// EXTRA: pagina de regulamento da plataforma (regras de negocio do sistema).
+  // EXTRA: pagina de regulamento da plataforma (regras de negocio do sistema).
 const REGRAS = [
   {
     titulo: '1. Natureza acadêmica',
@@ -38,12 +40,13 @@ export default function Regulamento() {
   return (
     <>
       <div className="page-header">
-        <h2>📜 Regulamento da <span className="page-title-accent">Plataforma</span></h2>
+        
+        <h2><Scroll size={50} color='#cc7d0f'/> Regulamento da <span className="page-title-accent">Plataforma</span></h2>
         <p className="text-muted mb-0">Regras de funcionamento da Bet Acadêmica.</p>
       </div>
 
       <Alert variant="warning">
-        <strong>⚠️ Aviso:</strong> esta é uma simulação acadêmica. Nenhum valor é real.
+        <strong> <TriangleAlert size={25} color='#cc7d0f' /> Aviso:</strong> esta é uma simulação acadêmica. Nenhum valor é real.
       </Alert>
 
       <Card className="shadow-sm">

@@ -8,4 +8,4 @@ export default function Loader({ texto = 'Carregando...' }) {
       <p className="mt-2 text-muted">{texto}</p>
     </div>
   )
-}
+  }

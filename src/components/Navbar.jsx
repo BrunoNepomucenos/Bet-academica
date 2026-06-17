@@ -2,7 +2,7 @@ import { Navbar as BsNavbar, Nav, Container, Button, Badge, Dropdown } from 'rea
 import { NavLink, useNavigate } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext.jsx'
 import { useTheme } from '../contexts/ThemeContext.jsx'
-
+import {Joystick, SunDim, Moon} from "lucide-react";
 // Pega as iniciais do nome para o avatar (ex.: "João Jogador" -> "JJ").
 function iniciais(nome = '') {
   return nome
@@ -29,7 +29,7 @@ export default function Navbar() {
     <BsNavbar variant="dark" expand="lg" sticky="top" className="bet-navbar">
       <Container>
         <BsNavbar.Brand as={NavLink} to="/">
-          🎯 Bet <span className="page-title-accent">Acadêmica</span>
+          <Joystick size={30} color='#00a870' />  Bet <span className="page-title-accent">Acadêmica</span>
         </BsNavbar.Brand>
         <BsNavbar.Toggle aria-controls="menu-principal" />
         <BsNavbar.Collapse id="menu-principal">
@@ -63,7 +63,7 @@ export default function Navbar() {
               title={escuro ? 'Mudar para tema claro' : 'Mudar para tema escuro'}
               aria-label="Alternar tema"
             >
-              {escuro ? '☀️' : '🌙'}
+              {escuro ? <SunDim size={30} color='#c28b14' /> : <Moon size={30} color='#1437c2' />}
             </Button>
 
             {autenticado ? (
