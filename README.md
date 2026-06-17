@@ -9,9 +9,10 @@ integração com sites reais de apostas.**
 
 ## 👥 Integrantes
 
-Bruno Nepomuceno
-Cícero Gomes
-
+| Integrante | Responsabilidades principais |
+|------------|------------------------------|
+| **Bruno Nepomuceno** | Estrutura inicial, Context API (Auth/Toast), login, rotas protegidas, área do administrador (eventos, resultado, painel estatístico) |
+| **Cícero Gomes** | Serviços (axios), área do jogador (eventos, apostas, saldo), histórico, dashboard, funcionalidades extras (ranking, bônus, filtro) |
 
 ---
 
