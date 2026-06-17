@@ -9,7 +9,9 @@ export default function Footer() {
         <span className="small">
           ⚠️ Plataforma 100% fictícia · sem dinheiro real, PIX ou cartão · uso educacional
         </span>
-        <span className="small">© {new Date().getFullYear()}</span>
+        <span className="small">
+          👨‍💻 Criado por <strong>Bruno Souza</strong> e <strong>Cícero</strong> · © {new Date().getFullYear()}
+        </span>
       </div>
     </footer>
   )
