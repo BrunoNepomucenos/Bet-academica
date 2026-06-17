@@ -12,8 +12,9 @@ import {
   registrarMovimentacao,
 } from '../../services/apostas.js'
 import { buscarUsuario, atualizarUsuario } from '../../services/usuarios.js'
-import { getMercados } from '../../config/mercados.js'
+import { getMercados, formatPlacar, parsePlacar } from '../../config/mercados.js'
 import { useToast } from '../../contexts/ToastContext.jsx'
+import PlacarPicker from '../../components/PlacarPicker.jsx'
 import StatusBadge from '../../components/StatusBadge.jsx'
 import Loader from '../../components/Loader.jsx'
 import ConfirmModal from '../../components/ConfirmModal.jsx'
@@ -141,10 +142,11 @@ export default function EventosAdmin() {
       // Mantem so os mercados do esporte que de fato receberam apostas.
       const mercados = getMercados(evento).filter((m) => idsComAposta.has(m.id))
 
-      // Resultado inicial de cada mercado = primeira opcao (o admin ajusta).
+      // Resultado inicial de cada mercado (o admin ajusta): placar comeca em 0x0,
+      // os demais na primeira opcao.
       const inicial = {}
       mercados.forEach((m) => {
-        inicial[m.id] = m.opcoes[0].label
+        inicial[m.id] = m.tipo === 'placar' ? formatPlacar(0, 0) : m.opcoes[0].label
       })
 
       setMercadosApuracao(mercados)
@@ -362,25 +364,49 @@ export default function EventosAdmin() {
               Defina o resultado de cada mercado que recebeu apostas. Ao confirmar,
               as apostas pendentes serão apuradas e os ganhadores receberão o prêmio.
             </p>
-            {mercadosApuracao.map((m) => (
-              <Form.Group className="mb-3" key={m.id}>
-                <Form.Label className="fw-semibold mb-1">
-                  {m.icone} {m.nome}
-                </Form.Label>
-                <Form.Select
-                  value={vencedores[m.id] || ''}
-                  onChange={(e) =>
-                    setVencedores((v) => ({ ...v, [m.id]: e.target.value }))
-                  }
-                >
-                  {m.opcoes.map((o) => (
-                    <option key={o.label} value={o.label}>
-                      {o.label}
-                    </option>
-                  ))}
-                </Form.Select>
-              </Form.Group>
-            ))}
+            {mercadosApuracao.map((m) => {
+              if (m.tipo === 'placar') {
+                const [a, b] = parsePlacar(vencedores[m.id])
+                return (
+                  <Form.Group className="mb-3" key={m.id}>
+                    <Form.Label className="fw-semibold mb-1">
+                      {m.icone} {m.nome}
+                    </Form.Label>
+                    <div className="border rounded p-3">
+                      <PlacarPicker
+                        timeA={eventoResultado.timeA}
+                        timeB={eventoResultado.timeB}
+                        a={a}
+                        b={b}
+                        max={m.maxGols}
+                        onChange={(na, nb) =>
+                          setVencedores((v) => ({ ...v, [m.id]: formatPlacar(na, nb) }))
+                        }
+                      />
+                    </div>
+                  </Form.Group>
+                )
+              }
+              return (
+                <Form.Group className="mb-3" key={m.id}>
+                  <Form.Label className="fw-semibold mb-1">
+                    {m.icone} {m.nome}
+                  </Form.Label>
+                  <Form.Select
+                    value={vencedores[m.id] || ''}
+                    onChange={(e) =>
+                      setVencedores((v) => ({ ...v, [m.id]: e.target.value }))
+                    }
+                  >
+                    {m.opcoes.map((o) => (
+                      <option key={o.label} value={o.label}>
+                        {o.label}
+                      </option>
+                    ))}
+                  </Form.Select>
+                </Form.Group>
+              )
+            })}
           </Modal.Body>
         )}
         <Modal.Footer>

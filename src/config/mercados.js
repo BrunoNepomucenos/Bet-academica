@@ -17,6 +17,28 @@
 // Util: arredonda para 2 casas mantendo number.
 const odd = (n) => Number(Number(n).toFixed(2))
 
+// --- Mercado de PLACAR EXATO (o jogador monta o resultado) --------------------
+
+// Calcula a odd de um placar montado pelo jogador. Quanto mais gols e maior a
+// diferenca, mais "improvavel" e maior a odd (modelo simples, academico).
+export function oddPlacar(a, b) {
+  const total = a + b
+  const valor = 5 + total * 1.6 + Math.abs(a - b) * 0.7
+  return odd(valor)
+}
+
+// Texto padrao de um placar (usado como "palpite" e na apuracao). Manter este
+// formato igual nos dois lados (aposta e resultado) garante a comparacao.
+export function formatPlacar(a, b) {
+  return `${a} x ${b}`
+}
+
+// Le de volta os gols a partir do texto "a x b" (default 0 x 0).
+export function parsePlacar(texto) {
+  const m = /^(\d+)\s*x\s*(\d+)$/i.exec(String(texto || '').trim())
+  return m ? [Number(m[1]), Number(m[2])] : [0, 0]
+}
+
 // ---------------------------------------------------------------------------
 // FUTEBOL ⚽
 // ---------------------------------------------------------------------------
@@ -72,17 +94,16 @@ function mercadosFutebol(ev) {
       id: 'placar_exato',
       nome: 'Placar Exato',
       icone: '🔢',
-      descricao: 'Acerte o resultado exato da partida.',
+      descricao: 'Monte o placar exato com que acha que a partida vai terminar.',
+      tipo: 'placar',
+      maxGols: 9,
+      odd: oddPlacar,
+      // Opcoes ilustrativas (atalhos); o jogador tambem pode montar livremente.
       opcoes: [
-        { label: `${ev.timeA} 1x0`, odd: 6.5 },
-        { label: `${ev.timeA} 2x0`, odd: 8.0 },
-        { label: `${ev.timeA} 2x1`, odd: 7.5 },
-        { label: 'Empate 0x0', odd: 8.5 },
-        { label: 'Empate 1x1', odd: 6.0 },
-        { label: 'Empate 2x2', odd: 12.0 },
-        { label: `${ev.timeB} 1x0`, odd: 7.0 },
-        { label: `${ev.timeB} 2x0`, odd: 9.0 },
-        { label: `${ev.timeB} 2x1`, odd: 8.0 },
+        { label: formatPlacar(1, 0), odd: oddPlacar(1, 0) },
+        { label: formatPlacar(2, 1), odd: oddPlacar(2, 1) },
+        { label: formatPlacar(1, 1), odd: oddPlacar(1, 1) },
+        { label: formatPlacar(0, 0), odd: oddPlacar(0, 0) },
       ],
     },
     {

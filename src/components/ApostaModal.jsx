@@ -1,6 +1,7 @@
 import { useState, useEffect, useMemo } from 'react'
 import { Modal, Button, Form, Alert, Badge } from 'react-bootstrap'
-import { getMercados } from '../config/mercados.js'
+import { getMercados, formatPlacar } from '../config/mercados.js'
+import PlacarPicker from './PlacarPicker.jsx'
 
 // Modal de aposta reutilizavel e personalizado por esporte.
 // O jogador escolhe (1) o MERCADO (area de aposta: placar, gols, cartoes...),
@@ -10,6 +11,9 @@ import { getMercados } from '../config/mercados.js'
 export default function ApostaModal({ evento, saldo, show, onHide, onConfirmar }) {
   const [mercadoId, setMercadoId] = useState('vencedor')
   const [palpite, setPalpite] = useState('')
+  // Gols escolhidos no seletor de placar (mercado do tipo 'placar').
+  const [golsA, setGolsA] = useState(0)
+  const [golsB, setGolsB] = useState(0)
   const [valor, setValor] = useState('')
   const [erro, setErro] = useState('')
 
@@ -21,6 +25,8 @@ export default function ApostaModal({ evento, saldo, show, onHide, onConfirmar }
     if (evento && mercados.length) {
       setMercadoId(mercados[0].id)
       setPalpite(mercados[0].opcoes[0].label)
+      setGolsA(0)
+      setGolsB(0)
       setValor('')
       setErro('')
     }
@@ -29,9 +35,15 @@ export default function ApostaModal({ evento, saldo, show, onHide, onConfirmar }
   if (!evento || !mercados.length) return null
 
   const mercadoAtual = mercados.find((m) => m.id === mercadoId) || mercados[0]
-  const opcaoAtual =
-    mercadoAtual.opcoes.find((o) => o.label === palpite) || mercadoAtual.opcoes[0]
-  const odd = opcaoAtual?.odd || 1
+  const ehPlacar = mercadoAtual.tipo === 'placar'
+
+  // No placar, o palpite/odd vem dos gols montados; nos demais, da opcao escolhida.
+  const opcaoAtual = mercadoAtual.opcoes.find((o) => o.label === palpite)
+  const palpiteFinal = ehPlacar ? formatPlacar(golsA, golsB) : palpite
+  const odd = ehPlacar
+    ? mercadoAtual.odd(golsA, golsB)
+    : opcaoAtual?.odd || mercadoAtual.opcoes[0].odd
+
   const valorNumerico = Number(valor)
   const retornoPotencial = valorNumerico > 0 ? (valorNumerico * odd).toFixed(2) : '0.00'
 
@@ -39,12 +51,14 @@ export default function ApostaModal({ evento, saldo, show, onHide, onConfirmar }
   function selecionarMercado(m) {
     setMercadoId(m.id)
     setPalpite(m.opcoes[0].label)
+    setGolsA(0)
+    setGolsB(0)
     setErro('')
   }
 
   function confirmar() {
     // Validacoes basicas de saldo e valor.
-    if (!palpite) {
+    if (!palpiteFinal) {
       setErro('Selecione uma opcao de aposta.')
       return
     }
@@ -59,7 +73,7 @@ export default function ApostaModal({ evento, saldo, show, onHide, onConfirmar }
     onConfirmar({
       mercado: mercadoAtual.id,
       mercadoNome: mercadoAtual.nome,
-      palpite,
+      palpite: palpiteFinal,
       odd,
       valor: valorNumerico,
     })
@@ -101,24 +115,58 @@ export default function ApostaModal({ evento, saldo, show, onHide, onConfirmar }
             {mercadoAtual.icone} {mercadoAtual.nome}
           </Form.Label>
           <p className="text-muted small mb-2">{mercadoAtual.descricao}</p>
-          <div className="d-flex flex-wrap gap-2">
-            {mercadoAtual.opcoes.map((o) => {
-              const ativo = palpite === o.label
-              return (
-                <button
-                  key={o.label}
-                  type="button"
-                  className={`btn ${ativo ? 'btn-success' : 'btn-outline-success'} d-flex align-items-center gap-2`}
-                  onClick={() => setPalpite(o.label)}
-                >
-                  <span>{o.label}</span>
-                  <Badge bg={ativo ? 'light' : 'success'} text={ativo ? 'success' : 'light'}>
-                    {Number(o.odd).toFixed(2)}
-                  </Badge>
-                </button>
-              )
-            })}
-          </div>
+
+          {ehPlacar ? (
+            <div className="border rounded p-3">
+              <PlacarPicker
+                timeA={evento.timeA}
+                timeB={evento.timeB}
+                a={golsA}
+                b={golsB}
+                max={mercadoAtual.maxGols}
+                onChange={(a, b) => {
+                  setGolsA(a)
+                  setGolsB(b)
+                }}
+              />
+              {/* Atalhos para placares comuns */}
+              <div className="d-flex flex-wrap gap-2 justify-content-center mt-3">
+                {mercadoAtual.opcoes.map((o) => (
+                  <button
+                    key={o.label}
+                    type="button"
+                    className={`chip ${palpiteFinal === o.label ? 'active' : ''}`}
+                    onClick={() => {
+                      const [a, b] = o.label.split(/\s*x\s*/i).map(Number)
+                      setGolsA(a)
+                      setGolsB(b)
+                    }}
+                  >
+                    {o.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+          ) : (
+            <div className="d-flex flex-wrap gap-2">
+              {mercadoAtual.opcoes.map((o) => {
+                const ativo = palpite === o.label
+                return (
+                  <button
+                    key={o.label}
+                    type="button"
+                    className={`btn ${ativo ? 'btn-success' : 'btn-outline-success'} d-flex align-items-center gap-2`}
+                    onClick={() => setPalpite(o.label)}
+                  >
+                    <span>{o.label}</span>
+                    <Badge bg={ativo ? 'light' : 'success'} text={ativo ? 'success' : 'light'}>
+                      {Number(o.odd).toFixed(2)}
+                    </Badge>
+                  </button>
+                )
+              })}
+            </div>
+          )}
         </div>
 
         {/* 3) Valor da aposta */}
@@ -140,7 +188,7 @@ export default function ApostaModal({ evento, saldo, show, onHide, onConfirmar }
           <div className="d-flex justify-content-between">
             <span>Seu palpite:</span>
             <strong>
-              {mercadoAtual.nome} → {palpite}
+              {mercadoAtual.nome} → {palpiteFinal}
             </strong>
           </div>
           <div className="d-flex justify-content-between">
