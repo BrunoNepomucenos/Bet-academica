@@ -38,21 +38,26 @@ export default function EventosAdmin() {
   const [eventoResultado, setEventoResultado] = useState(null)
   const [eventoExcluir, setEventoExcluir] = useState(null)
 
+  // Ao montar a tela, busca os eventos uma vez.
   useEffect(() => {
     carregar()
   }, [])
 
+  // Recarrega a lista de eventos da API (chamada apos cada acao que muda os dados).
   async function carregar() {
     setCarregando(true)
     setEventos(await listarEventos())
     setCarregando(false)
   }
 
+  // Controlador unico do formulario: usa o "name" de cada campo para atualizar
+  // apenas aquela propriedade do objeto "form", mantendo o resto intacto.
   function handleChange(e) {
     const { name, value } = e.target
     setForm((f) => ({ ...f, [name]: value }))
   }
 
+  // Entra no modo edicao: guarda o id e preenche o formulario com os dados do evento.
   function iniciarEdicao(evento) {
     setEditandoId(evento.id)
     setForm({
@@ -66,6 +71,7 @@ export default function EventosAdmin() {
     window.scrollTo({ top: 0, behavior: 'smooth' })
   }
 
+  // Sai do modo edicao e limpa o formulario, voltando ao estado de cadastro.
   function cancelarEdicao() {
     setEditandoId(null)
     setForm(eventoVazio)
@@ -90,12 +96,15 @@ export default function EventosAdmin() {
     }
   }
 
+  // Encerra as apostas: muda o status para 'encerrado' (bloqueia novas apostas,
+  // mas o evento ainda nao tem resultado).
   async function encerrarApostas(evento) {
     await atualizarEvento(evento.id, { status: 'encerrado' })
     notificar('Apostas encerradas para este evento.', 'warning')
     carregar()
   }
 
+  // Exclui de vez o evento selecionado no modal de confirmacao.
   async function confirmarExclusao() {
     try {
       await removerEvento(eventoExcluir.id)
@@ -111,20 +120,28 @@ export default function EventosAdmin() {
   async function confirmarResultado(vencedor) {
     const evento = eventoResultado
     try {
+      // 1) Pega todas as apostas feitas neste evento.
       const apostas = await listarApostasPorEvento(evento.id)
 
+      // 2) Percorre aposta por aposta para apurar quem ganhou/perdeu.
       for (const aposta of apostas) {
+        // Ignora apostas que ja foram resolvidas ou canceladas (so processa pendentes).
         if (aposta.status !== 'pendente') continue
 
+        // Acertou se o palpite do jogador foi o time vencedor escolhido pelo admin.
         const acertou = aposta.palpite === vencedor
+        // Premio = valor apostado x odd (so quem acertou ganha; arredonda a 2 casas).
         const retorno = acertou ? Number((aposta.valor * (aposta.odd || 1)).toFixed(2)) : 0
 
+        // Marca a aposta como ganha ou perdida e grava o retorno.
         await atualizarAposta(aposta.id, {
           status: acertou ? 'ganha' : 'perdida',
           retorno,
         })
 
+        // Se acertou, credita o premio no saldo do jogador e lanca no extrato.
         if (acertou) {
+          // Busca o saldo atual do jogador antes de somar (evita usar valor desatualizado).
           const jogador = await buscarUsuario(aposta.usuarioId)
           await atualizarUsuario(jogador.id, { saldo: jogador.saldo + retorno })
           await registrarMovimentacao({
@@ -137,6 +154,7 @@ export default function EventosAdmin() {
         }
       }
 
+      // 3) Por fim, fecha o evento: status 'finalizado' e registra o vencedor.
       await atualizarEvento(evento.id, { status: 'finalizado', resultado: vencedor })
       notificar('Resultado lançado e apostas atualizadas!', 'success')
       setEventoResultado(null)

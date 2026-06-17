@@ -17,21 +17,26 @@ export default function BonusAdmin() {
     carregar()
   }, [])
 
+  // Recarrega a lista de jogadores (e seus saldos/bonus) da API.
   async function carregar() {
     setCarregando(true)
     setJogadores(await listarJogadores())
     setCarregando(false)
   }
 
+  // Credita um bonus ficticio: soma o valor ao saldo e ao bonus acumulado do
+  // jogador escolhido e registra a movimentacao no extrato dele.
   async function concederBonus(e) {
     e.preventDefault()
     const valorNumerico = Number(valor)
+    // Validacao: precisa ter jogador selecionado e valor positivo.
     if (!jogadorId || valorNumerico <= 0) {
       notificar('Selecione um jogador e um valor válido.', 'warning')
       return
     }
 
     try {
+      // O value do <select> vem como texto; converte para numero ao comparar o id.
       const jogador = jogadores.find((j) => j.id === Number(jogadorId))
       await atualizarUsuario(jogador.id, {
         saldo: jogador.saldo + valorNumerico,

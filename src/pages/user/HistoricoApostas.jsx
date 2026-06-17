@@ -37,19 +37,19 @@ export default function HistoricoApostas() {
     carregar();
   }, [usuario.id]);
 
+  // Carrega apostas do jogador + eventos em paralelo (Promise.all e mais rapido
+  // que esperar uma de cada vez).
   async function carregar() {
     setCarregando(true);
     const [listaApostas, listaEventos] = await Promise.all([
       listarApostasPorUsuario(usuario.id),
       listarEventos(),
-    ]);
-    const mapa = {};
-    listaEventos.forEach((e) => {
-      mapa[e.id] = e;
-    });
-    setEventos(mapa);
-    setApostas(listaApostas.reverse());
-    setCarregando(false);
+    ])
+    const mapa = {}
+    listaEventos.forEach((e) => { mapa[e.id] = e })
+    setEventos(mapa)
+    setApostas(listaApostas.reverse())
+    setCarregando(false)
   }
 
   // Aposta pode ser cancelada se estiver pendente e o evento ainda estiver aberto.

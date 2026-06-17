@@ -1,0 +1,11 @@
+# Blueprint do Render para hospedar o backend (json-server).
+# No painel do Render: New > Blueprint > selecione este repositorio.
+# O Render le este arquivo e cria o servico automaticamente.
+services:
+  - type: web
+    name: bet-academica-api
+    runtime: node
+    plan: free
+    buildCommand: npm install
+    # O Render injeta a variavel $PORT; o script "start" do package.json a utiliza.
+    startCommand: npm run start

@@ -1,12 +1,17 @@
 import api from './api.js'
 
+// Camada de servico dos USUARIOS (admin e jogadores) e da autenticacao simulada.
+
 // Login simulado: busca um usuario pelo email e compara a senha.
+// Atencao: por ser um projeto academico, a senha trafega/compara em texto puro.
+// Em um sistema real isso jamais seria feito assim (usar hash + backend seguro).
 export async function login(email, senha) {
   const { data } = await api.get('/usuarios', { params: { email } })
   const usuario = data.find((u) => u.senha === senha)
   return usuario || null
 }
 
+// Lista todos os usuarios cadastrados (admin + jogadores).
 export async function listarUsuarios() {
   const { data } = await api.get('/usuarios')
   return data
@@ -32,6 +37,7 @@ export async function cadastrarUsuario({ nome, email, senha }) {
   return data
 }
 
+// Busca um usuario pelo id. Usado ao creditar premio/bonus para pegar o saldo atual.
 export async function buscarUsuario(id) {
   const { data } = await api.get(`/usuarios/${id}`)
   return data
